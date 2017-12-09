@@ -1,0 +1,33 @@
+-- Part a
+function scan_divide_rec(v, s, e) =
+  if e - s > 2 then let
+    lp = scan_divide_rec(v, s, (s + e) / 2);
+    l_sum = lp[#lp - 1];
+    rp = scan_divide_rec(v, (s + e) /2, e)
+  in lp ++ {x + l_sum: x in rp}
+  else [v[s], v[s] + v[e]]
+
+function scan_divide(v) =
+  if #v == 1 then [0]
+  else scan_divide_rec(v, 0, #v - 1)
+
+-- Part b
+function power_of_2(a, b) =
+  if a <= b then b else power_of_2(a, b * 2)
+
+function pad_to_power_of_2(v) =
+  let
+    closest_power = power_of_2(#v, 2)
+  in
+    {if i < #v then v[i] else 0: i in &closest_power}
+
+function scan_unite(unpow_v) =   -- assumes #v is a power of 2
+  if #unpow_v == 1 then [0]
+  else let
+    v = pad_to_power_of_2(unpow_v);
+    vp = partition(v, {2: _ in &(#v / 2)});
+    ps = {p[0]+p[1] : p in vp};
+    sps = scan(ps)
+  in concat({[s, s+p[0]] : s in sps; p in vp})
+
+-- Part c
