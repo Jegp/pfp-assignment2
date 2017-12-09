@@ -1,0 +1,23 @@
+function _AND(a, b) =
+  if not(a) then F else b
+
+function _OR(a, b) =
+  if a then T else b
+
+function _XOR(a, b) =
+  if a then not(b) else T
+
+function ischar(c) =
+  let gt_a = ord(c) >= ord('a');
+      lt_z = ord(c) <= ord('z');
+      gt_A = ord(c) >= ord('A');
+      lt_Z = ord(c) <= ord('Z')
+  in _OR(_AND(gt_a, lt_z), _AND(gt_A, lt_Z))
+
+function split_words(words) =
+  let alpha_list = { ischar(x) : x in (words ++ " ") };
+      idx_list = &(#words);
+      alpha_idx = {i + 1: i in idx_list | _OR(i == #words - 1, _OR(not(alpha_list[i]), _AND(alpha_list[i], not(alpha_list[i + 1])))) };
+      scatter_idx = {if x == 0 then alpha_idx[x] else alpha_idx[x] - alpha_idx[x - 1]: x in &#alpha_idx};
+      words_with_non_words = partition(words, scatter_idx)
+  in {w: w in words_with_non_words | ischar(w[0])}
