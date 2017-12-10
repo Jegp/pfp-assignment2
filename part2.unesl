@@ -1,15 +1,16 @@
 -- Part a
-function scan_divide_rec(v, s, e) =
+function scan_divide_rec(v, s, e, sum) =
   if e - s > 2 then let
-    lp = scan_divide_rec(v, s, (s + e) / 2);
-    l_sum = lp[#lp - 1];
-    rp = scan_divide_rec(v, (s + e) /2, e)
-  in lp ++ {x + l_sum: x in rp}
-  else [v[s], v[s] + v[e]]
+    lp = scan_divide_rec(v, s, (s + e) / 2, sum);
+    l_sum = lp[#lp - 1]
+  in lp ++ scan_divide_rec(v, (s + e) / 2 + 1, e, l_sum)
+  else [v[s] + sum, v[s] + v[e] + sum]
 
 function scan_divide(v) =
   if #v == 1 then [0]
-  else scan_divide_rec(v, 0, #v - 1)
+  else let
+    inc = scan_divide_rec(v, 0, #v - 1, 0)
+  in [0] ++ {inc[i]: i in &(#inc - 1)}
 
 -- Part b
 function power_of_2(a, b) =
@@ -27,7 +28,5 @@ function scan_unite(unpow_v) =   -- assumes #v is a power of 2
     v = pad_to_power_of_2(unpow_v);
     vp = partition(v, {2: _ in &(#v / 2)});
     ps = {p[0]+p[1] : p in vp};
-    sps = scan(ps)
+    sps = scan_unite(ps)
   in concat({[s, s+p[0]] : s in sps; p in vp})
-
--- Part c

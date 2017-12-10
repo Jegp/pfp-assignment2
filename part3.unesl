@@ -1,0 +1,28 @@
+function _AND(a, b) =
+  if not(a) then F else b
+
+-- Part c
+def radix = 10
+
+function max_base(n, b) =
+  if n < pow(radix, b) then b else max_base(n, b + 1)
+
+function radix_base_digit(n, d) =
+  n / pow(radix, d) % 10
+
+def max_radix_i32 = max_base(pow(2, 32), 1)
+
+-- Sort a single bucket (list of numbers)
+function radix_sort_msd_bucket(v, r) =
+  if #v <= 1 then v
+  else let
+    base_digits = {(radix_base_digit(n, r), n): n in v};
+    buckets = scatter(base_digits, radix)
+  in concat({if _AND(#b > 1, not(r < 1)) then radix_sort_msd_bucket(b, r - 1) else b: b in buckets})
+
+function radix_sort_msd(v) =
+  let
+    bases = {(max_base(n, 1), n): n in v};
+    buckets = scatter(bases, max_radix_i32);
+    sorted = {radix_sort_msd_bucket(buckets[i], i - 1): i in &max_radix_i32}
+  in concat(sorted)
