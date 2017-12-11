@@ -29,6 +29,9 @@ function _AND(a, b) =
 
 def radix = 10
 
+function max_base(n, b) =
+  if n < pow(radix, b) then b else max_base(n, b + 1)
+
 function radix_base_digit(n, d) =
   n / pow(radix, d) % 10
 
@@ -47,17 +50,19 @@ function radix_sort_string_bucket(v, d, c) =
   else let
     sorted_buckets = radix_sort_string_position(v, d, c)
   in {if #bucket > 1 then concat(radix_sort_string_bucket(bucket, d - 1, c))
-     else bucket: bucket in sorted_buckets}
+     else bucket: bucket in sorted_buckets | #bucket > 0}
 
 function radix_sort_string_rec(v, c) =
   let
     char_buckets = radix_sort_string_bucket(v, max_radix_i32, c);
-    sorted_short = {{w: w in bucket | #w == c + 1}: bucket in char_buckets};
-    unsorted_rec = {{w: w in bucket | #w > c + 1}: bucket in char_buckets};
-    sorted_rec = {if #bucket > 1 then radix_sort_string_rec(bucket, c + 1) else bucket: bucket in unsorted_rec}
-  in concat({sorted_short[i] ++ sorted_rec[i]: i in &radix})
+    sorted = {{w: w in bucket | #w == c + 1}: bucket in char_buckets};
+    unsorted = {{w: w in bucket | #w > c + 1}: bucket in char_buckets};
+    sorted_rec = {if #bucket > 1
+      then concat(radix_sort_string_rec(bucket, c + 1))
+      else bucket: bucket in unsorted}
+  in sorted ++ unsorted
 
 function radix_sort_string(v) =
   let
-    sorted_ints = radix_sort_string_rec({{ord(x): x in word}: word in v}, 0)
-  in {{chr(x): x in word}: word in sorted_ints}
+    sorted_buckets = radix_sort_string_rec({{ord(x): x in word}: word in v}, 0)
+  in {{{chr(x): x in word}: word in bucket}: bucket in sorted_buckets  | #bucket > 0}
