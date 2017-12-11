@@ -1,7 +1,6 @@
 function _AND(a, b) =
   if not(a) then F else b
 
--- Part c
 def radix = 10
 
 function max_base(n, b) =
