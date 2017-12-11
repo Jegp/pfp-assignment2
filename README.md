@@ -1,5 +1,7 @@
 # Hand-in 2
 
+Code is also available here: https://github.com/Jegp/pfp-assignment2
+
 # Part 1
 I solved this part by defining a function for distiguishing between characters
 (a-z;A-A) and non-characters (everything else). With that I made a boolean
