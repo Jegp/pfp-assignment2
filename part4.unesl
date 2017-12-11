@@ -1,0 +1,63 @@
+function chr_cmp(a, b) =
+  if ord(a) > ord(b) then 1
+  else (if ord(a) < ord(b) then -1
+  else 0)
+
+function str_cmp_rec(a, b, i) =
+  if #a <= i then -1
+  else if #b <= i then 1
+  else let
+    v = chr_cmp(a[i], b[i])
+  in if v == 0 then str_cmp_rec(a, b, i + 1) else v
+
+-- Quicksort implementation
+function quick_sort_rec(v, p) =
+  let
+    split_groups = {(if str_cmp_rec(v[n + 1], p, 0) >= 0 then 1 else 0, v[n + 1]): n in &(#v - 1)}; -- Exclude comparator
+    xs = scatter(split_groups, 2);
+    lp = if #xs[0] <= 1 then xs[0] else quick_sort_rec(xs[0], xs[0][0]);
+    rp = if #xs[1] <= 1 then xs[1] else quick_sort_rec(xs[1], xs[1][0])
+  in lp ++ [p] ++ rp
+
+function quick_sort(v) =
+  if #v <= 1 then v
+  else quick_sort_rec(v, v[0])
+
+-- Radix sort using strings
+function _AND(a, b) =
+  if not(a) then F else b
+
+def radix = 10
+
+function radix_base_digit(n, d) =
+  n / pow(radix, d) % 10
+
+def max_radix_i32 = 2 -- ASCII have max 3 digits (0-indexed)
+
+--Sort a single bucket in a single position (vertically)
+function radix_sort_string_position(v, d, c) =
+  if d < 0 then [v]
+  else let
+    base_digits = {(radix_base_digit(word[c], d), word): word in v};
+    buckets = scatter(base_digits, radix)
+  in buckets
+
+function radix_sort_string_bucket(v, d, c) =
+  if d < 0 then [v]
+  else let
+    sorted_buckets = radix_sort_string_position(v, d, c)
+  in {if #bucket > 1 then concat(radix_sort_string_bucket(bucket, d - 1, c))
+     else bucket: bucket in sorted_buckets}
+
+function radix_sort_string_rec(v, c) =
+  let
+    char_buckets = radix_sort_string_bucket(v, max_radix_i32, c);
+    sorted_short = {{w: w in bucket | #w == c + 1}: bucket in char_buckets};
+    unsorted_rec = {{w: w in bucket | #w > c + 1}: bucket in char_buckets};
+    sorted_rec = {if #bucket > 1 then radix_sort_string_rec(bucket, c + 1) else bucket: bucket in unsorted_rec}
+  in concat({sorted_short[i] ++ sorted_rec[i]: i in &radix})
+
+function radix_sort_string(v) =
+  let
+    sorted_ints = radix_sort_string_rec({{ord(x): x in word}: word in v}, 0)
+  in {{chr(x): x in word}: word in sorted_ints}
