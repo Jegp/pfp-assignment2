@@ -1,5 +1,7 @@
 # Hand-in 2
 
+Author: xtp778 - Jens Egholm Pedersen
+
 Code is also available here: https://github.com/Jegp/pfp-assignment2
 
 # Part 1
